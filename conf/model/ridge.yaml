@@ -1,0 +1,4 @@
+ml_pipeline_config: RidgePipelineConfig
+params:
+  regressor__alpha: 2
+  regressor__fit_intercept: True

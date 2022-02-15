@@ -1,0 +1,26 @@
+name: ml-example-project-aml
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.9
+  - make
+  - pip
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - scikit-plot
+  - jupyter
+  - pyarrow
+  - seaborn
+  - pip:
+    - click
+    - python-dotenv
+    - rich
+    - pandera
+    - evidently
+    - mlflow
+    - azureml-mlflow
+    - hydra-core
+    - azureml-dataset-runtime
+    - azureml-pipeline-core

@@ -1,0 +1,36 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: housing-model-inference-pipeline
+display_name: house-model-inference-pipeline
+compute: azureml:cpu-cluster
+settings:
+  environment: azureml:mlops-example-proj-env:4
+jobs:
+  get_and_prepare_data:
+    command: >-
+      python -m src.data.prepare_data_pipeline 
+      main=inference-pipeline
+      data.model_input=${{outputs.model_input}}/model_input.parquet
+    code:
+      local_path: ../.
+    outputs:
+      model_input:
+  inference:
+    command: >-
+        python -m src.models.inference 
+        main=inference-pipeline
+        data.model_input=${{inputs.model_input}}/model_input.parquet
+        data.predictions=${{outputs.predictions}}/predictions.parquet
+    code:
+      local_path: ../.
+    inputs:
+      model_input: ${{jobs.get_and_prepare_data.outputs.model_input}}
+    outputs:
+      predictions:
+    environment_variables:
+      SUBSCRIPTION_ID: "replace-me"
+      RESOURCE_GROUP: "replace-me"
+      WORKSPACE_NAME: "replace-me"
+      TENANT_ID: "replace-me"
+      SERVICE_PRINCIPAL_ID: "replace-me"
+      SERVICE_PRINCIPAL_PASSWORD: "replace-me"

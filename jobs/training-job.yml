@@ -1,0 +1,85 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: house-model-training-pipeline
+experiment_name: housing-model-training-pipeline
+compute: azureml:cpu-cluster
+settings:
+  environment: azureml:mlops-example-proj-env:4
+jobs:
+  get_raw_data:
+    command: >-
+      python -m src.data.get_raw_data 
+      data.raw_data=${{outputs.raw_data}}/raw_trainin_data.parquet
+    code:
+      local_path: ../.
+    outputs:
+      raw_data:
+  preprocess_data:
+    command: >-
+      python -m src.data.process_data
+      data.raw_data=${{inputs.raw_data}}/raw_trainin_data.parquet
+      data.clean_data=${{outputs.clean_data}}/clean_trainin_data.parquet
+    code:
+      local_path: ../.
+    inputs:
+      raw_data: ${{jobs.get_raw_data.outputs.raw_data}}
+    outputs:
+      clean_data:
+  add_features:
+    command: >-
+      python -m src.data.add_features 
+      data.clean_data=${{inputs.clean_data}}/clean_trainin_data.parquet
+      data.model_input=${{outputs.model_input}}/model_input.parquet
+    code:
+      local_path: ../.
+    inputs:
+      clean_data: ${{jobs.preprocess_data.outputs.clean_data}}
+    outputs:
+      model_input:
+  validate_model_input:
+    command: >-
+        python -m src.data.validate_data 
+        data.model_input=${{inputs.model_input}}/model_input.parquet
+    code:
+      local_path: ../.
+    inputs:
+      model_input: ${{jobs.add_features.outputs.model_input}}
+  data_segregation:
+    command: >-
+        python -m src.data.data_segregation 
+        data.model_input=${{inputs.model_input}}/model_input.parquet
+        data.train_validate_data=${{outputs.train_validate_data}}/train_validate_data.parquet
+        data.test_data=${{outputs.test_data}}/test_data.parquet
+    code:
+      local_path: ../.
+    inputs:
+      model_input: ${{jobs.add_features.outputs.model_input}}
+    outputs:
+      test_data:
+      train_validate_data:
+  train_evaluate:
+    command: >-
+        python -m src.models.train_and_evaluate 
+        data.train_validate_data=${{inputs.train_validate_data}}/train_validate_data.parquet
+    code:
+      local_path: ../.
+    inputs:
+      train_validate_data: ${{jobs.data_segregation.outputs.train_validate_data}}
+    outputs:
+      model_dummy:
+  test_and_promote_model:
+    command: >-
+        python -m src.models.promote_model 
+        data.test_data=${{inputs.test_data}}/test_data.parquet
+    code:
+      local_path: ../.
+    inputs:
+      test_data: ${{jobs.data_segregation.outputs.test_data}}
+      model_dummy: ${{jobs.train_evaluate.outputs.model_dummy}}
+    environment_variables:
+      SUBSCRIPTION_ID: "replace-me"
+      RESOURCE_GROUP: "replace-me"
+      WORKSPACE_NAME: "replace-me"
+      TENANT_ID: "replace-me"
+      SERVICE_PRINCIPAL_ID: "replace-me"
+      SERVICE_PRINCIPAL_PASSWORD: "replace-me"

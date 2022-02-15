@@ -1,0 +1,3 @@
+model_input: "data/inference_pipeline/processed/modelling_data.parquet"
+feature_drift_report: "artifacts/feature_drift/data_drift_report.html"
+feature_drift_profile: "artifacts/feature_drift/data_drift_profile.json"

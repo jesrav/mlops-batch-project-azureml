@@ -1,0 +1,22 @@
+name: random-forest-sweep
+project: housing-model
+program: src/models/train_and_evaluate.py
+command:
+  - ${env}
+  - ${interpreter}
+  - ${program}
+  - "model=random_forest"
+  - ${args_no_hyphens}
+method: bayes
+metric:
+  name: mae
+  goal: minimize
+parameters:
+  model.params.regressor__max_depth:
+    min: 1
+    max: 30
+  model.params.regressor__min_samples_split:
+    min: 1
+    max: 30
+  model.params.regressor__max_features:
+    values: ["auto", "sqrt", "log2"]

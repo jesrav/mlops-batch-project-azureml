@@ -1,0 +1,27 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: housing-model-drift-detection
+display_name: housing-model-drift-detection
+compute: azureml:cpu-cluster
+settings:
+  environment: azureml:mlops-example-proj-env:4
+jobs:
+  drift_detection:
+    command: >-
+      python -m src.data.feature_drift_detection 
+      main=drift-detection-pipeline 
+      data=drift-detection-pipeline
+      data.feature_drift_report=${{outputs.feature_drift_report}}/data_drift_report.html
+      data.feature_drift_profile=${{outputs.feature_drift_profile}}/data_drift_profile.json
+    code:
+      local_path: ../.
+    outputs:
+      feature_drift_report:
+      feature_drift_profile:
+    environment_variables:
+      SUBSCRIPTION_ID: "replace-me"
+      RESOURCE_GROUP: "replace-me"
+      WORKSPACE_NAME: "replace-me"
+      TENANT_ID: "replace-me"
+      SERVICE_PRINCIPAL_ID: "replace-me"
+      SERVICE_PRINCIPAL_PASSWORD: "replace-me"

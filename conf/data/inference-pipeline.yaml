@@ -1,0 +1,4 @@
+raw_data: "data/inference_pipeline/raw/raw_data.parquet"
+clean_data: "data/inference_pipeline/processed/clean_data.parquet"
+model_input: "data/inference_pipeline/processed/modelling_data.parquet"
+predictions: "data/inference_pipeline/processed/predictions.parquet"
