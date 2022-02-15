@@ -1,12 +1,13 @@
 """
 Module for doing drift detection
 """
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, tempdir
 import logging
 import os
 
 import hydra
 import pandas as pd
+import mlflow
 from azureml.core import Workspace, Model, Run, Experiment
 from azureml.pipeline.core import PipelineRun
 from azureml.core.authentication import ServicePrincipalAuthentication
@@ -98,23 +99,22 @@ def main(config):
         experiment_name=config["main"]["inference_experiment_name"]
     )
 
-    logger.info("Create and log data drift report.")
+    logger.info("Create and log data drift report and profile.")
     data_drift_report = Dashboard(tabs=[DataDriftTab()])
     data_drift_report.calculate(
         reference_data=training_data,
         current_data=latest_inference_data
     )
-    data_drift_report.save(config["data"]["feature_drift_report"])
-
-    logger.info("Create and log data drift profile.")
     data_drift_profile = Profile(sections=[DataDriftProfileSection()])
     data_drift_profile.calculate(
         reference_data=training_data,
         current_data=latest_inference_data
     )
     with TemporaryDirectory() as tmpdirname:
-        with open(config["data"]["feature_drift_profile"], "w") as file:
+        data_drift_report.save(tmpdirname + "/data_drift_report.html")
+        with open(tmpdirname + "/data_drift_profile.json", "w") as file:
             file.write(data_drift_profile.json())
+        mlflow.log_artifact(tmpdirname, artifact_path="drift-detection")
 
     # Get number of drifted features from analyzer
     n_drifted_features = data_drift_profile.analyzers_results[DataDriftAnalyzer].metrics.n_drifted_features
