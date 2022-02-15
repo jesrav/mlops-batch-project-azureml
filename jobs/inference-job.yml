@@ -4,7 +4,7 @@ experiment_name: housing-model-inference-pipeline
 display_name: house-model-inference-pipeline
 compute: azureml:cpu-cluster
 settings:
-  environment: azureml:mlops-example-proj-env:4
+  environment: azureml:mlops-example-proj-env:5
 jobs:
   get_and_prepare_data:
     command: >-

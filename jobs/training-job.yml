@@ -4,7 +4,7 @@ display_name: house-model-training-pipeline
 experiment_name: housing-model-training-pipeline
 compute: azureml:cpu-cluster
 settings:
-  environment: azureml:mlops-example-proj-env:4
+  environment: azureml:mlops-example-proj-env:5
 jobs:
   get_raw_data:
     command: >-

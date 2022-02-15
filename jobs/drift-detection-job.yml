@@ -4,7 +4,7 @@ experiment_name: housing-model-drift-detection
 display_name: housing-model-drift-detection
 compute: azureml:cpu-cluster
 settings:
-  environment: azureml:mlops-example-proj-env:4
+  environment: azureml:mlops-example-proj-env:5
 jobs:
   drift_detection:
     command: >-
