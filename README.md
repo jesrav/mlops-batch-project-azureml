@@ -33,7 +33,9 @@ make set_az_deafaults
 ```
 
 ### Create AzureML compute cluster
-
+```bash
+make create_aml_compute
+```
 
 ### Create AzureML environment
 ```bash
@@ -58,6 +60,9 @@ A very simplistic drift can be configures in the `main` Hydra configuration.
 make run_aml_drift_detection_job
 ```
 This will run drift detection, that compares the data used to make the latest predictions with the data used to train the latest `prod` model.
+
+# See runs
+To see your runs go to https://ml.azure.com/ and log into your workspace.
 
 
 
