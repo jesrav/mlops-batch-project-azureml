@@ -184,6 +184,7 @@ def main(config):
         )
         if model_to_be_promoted:
             loaded_model_challenger.promote_to_prod()
+            loaded_model_current.demote_from_prod()
 
         log_promotion_status(
             model_id=loaded_model_challenger.model_meta_data.model_id,
