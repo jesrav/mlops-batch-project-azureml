@@ -24,13 +24,13 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
 
-        df = pd.read_parquet(config["data"]["clean_data"])
+    df = pd.read_parquet(config["data"]["clean_data"])
 
-        logger.info('Add features.')
-        df = add_features(df)
+    logger.info('Add features.')
+    df = add_features(df)
 
-        logger.info('Log modelling input data artifact.')
-        df.to_parquet(config["data"]["model_input"])
+    logger.info('Save modelling input data.')
+    df.to_parquet(config["data"]["model_input"])
 
 
 if __name__ == "__main__":

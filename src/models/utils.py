@@ -1,4 +1,4 @@
-"""utils for using MLFlow in Azure ML."""
+"""utils for using MLFlow and Azure ML."""
 import math
 
 from dataclasses import dataclass
@@ -41,6 +41,7 @@ class LoadedMLFlowModel:
 
     @classmethod
     def from_aml_model(cls, aml_model: Model):
+        """Get a `LoadedModel`from a Azure ML Model"""
         model_meta_data = ModelMetaData(model_id=aml_model.id, run_id=aml_model.run_id)
         temp_dir = tempfile.mkdtemp()
         aml_model.download(temp_dir, exist_ok=True)
@@ -48,10 +49,12 @@ class LoadedMLFlowModel:
         return LoadedMLFlowModel(model=model, model_meta_data=model_meta_data, aml_model=aml_model)
 
     def promote_to_prod(self):
+        """Promote model to production"""
         self.aml_model.add_tags({"prod": True})
         self.aml_model.update_tags_properties()
 
     def demote_from_prod(self):
+        """Demote model from production"""
         self.aml_model.remove_tags(["prod"])
         self.aml_model.update_tags_properties()
 

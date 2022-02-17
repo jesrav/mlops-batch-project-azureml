@@ -1,3 +1,9 @@
+"""
+Module for training and evaluating a model.
+
+A model configuration that implements the interface found in
+src.models.model_pipeliene_configs.BasePipelineConfig is passed supplied through the Hyrda configuration.
+"""
 import logging
 from tempfile import TemporaryDirectory
 from typing import Type
@@ -9,13 +15,13 @@ import mlflow
 
 from ..models.utils import MLFlowModelWrapper
 from ..models.evaluation import RegressionEvaluation
-from ..models import models
+from ..models import model_pipeliene_configs
 
 logger = logging.getLogger(__name__)
 
 
 def train_evaluate(
-    pipeline_class: Type[models.BasePipelineConfig],
+    pipeline_class: Type[model_pipeliene_configs.BasePipelineConfig],
     config: dict,
 ):
     mlflow.log_params(config["model"]["params"])
@@ -42,7 +48,7 @@ def train_evaluate(
         y_pred=predictions,
     )
 
-    logger.info("train on model on all artifacts")
+    logger.info("train on model on all data")
     pipeline.fit(df, df[target_column])
 
     logger.info("Logging performance metrics.")
@@ -66,7 +72,7 @@ def train_evaluate(
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-    model_class = getattr(models, config["model"]["ml_pipeline_config"])
+    model_class = getattr(model_pipeliene_configs, config["model"]["ml_pipeline_config"])
     train_evaluate(
         pipeline_class=model_class,
         config=config,

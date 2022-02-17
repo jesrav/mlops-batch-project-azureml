@@ -1,5 +1,5 @@
 """
-Module to do preprocessing of artifacts.
+Module to do preprocessing.
 """
 import logging
 
@@ -15,13 +15,13 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-        df = pd.read_parquet(config["data"]["raw_data"])
+    df = pd.read_parquet(config["data"]["raw_data"])
 
-        logger.info('Preprocess raw artifacts.')
-        df = preprocess(df)
+    logger.info('Preprocess raw artifacts.')
+    df = preprocess(df)
 
-        logger.info('Log preprocessed artifacts.')
-        df.to_parquet(config["data"]["clean_data"])
+    logger.info('Save preprocessed artifacts.')
+    df.to_parquet(config["data"]["clean_data"])
 
 
 if __name__ == "__main__":
