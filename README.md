@@ -2,8 +2,7 @@
 
 Toy project, that implements passive retraining for a batch prediction regression use case.
 
-The project is not concerned with deployment or the development of the ML models. 
-It uses the Boston housing data and can be run locally.
+The project deploys pipelines for training, inference and drift detection as Azure ML pipeline jobs via the Azure ML cli v2.
 
 
 ## Tools used
