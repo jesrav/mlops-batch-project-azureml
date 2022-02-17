@@ -146,3 +146,4 @@ cython_debug/
 /artifacts/*.pickle
 /artifacts/*.parquet
 /artifacts/*.html
+/notebooks
