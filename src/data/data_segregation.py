@@ -10,7 +10,7 @@ import mlflow
 from sklearn.model_selection import train_test_split
 import pandas as pd
 
-from ..utils import set_seed()
+from ..utils import set_seed
 
 logger = logging.getLogger(__name__)
 
