@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def main(config):
     logger.info("Fix seed.")
     seed = set_seed()
-    mlflow.log({"seed": seed})
+    mlflow.log_params({"seed": seed})
 
     logger.info('Load modelling data.')
     df = pd.read_parquet(config["data"]["model_input"])

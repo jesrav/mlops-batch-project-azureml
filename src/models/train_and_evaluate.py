@@ -27,7 +27,7 @@ def train_evaluate(
 
     logger.info("Fix seed.")
     seed = set_seed()
-    mlflow.log({"seed": seed})
+    mlflow.log_params({"seed": seed})
 
     mlflow.log_params(config["model"]["params"])
 
