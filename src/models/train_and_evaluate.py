@@ -13,7 +13,7 @@ from sklearn.model_selection import cross_val_predict
 import hydra
 import mlflow
 
-from ..models.utils import MLFlowModelWrapper
+from ..utils import MLFlowModelWrapper, set_seed
 from ..models.evaluation import RegressionEvaluation
 from ..models import model_pipeliene_configs
 
@@ -24,6 +24,11 @@ def train_evaluate(
     pipeline_class: Type[model_pipeliene_configs.BasePipelineConfig],
     config: dict,
 ):
+
+    logger.info("Fix seed.")
+    seed = set_seed()
+    mlflow.log({"seed": seed})
+
     mlflow.log_params(config["model"]["params"])
 
     target_column = config["main"]["target_column"]

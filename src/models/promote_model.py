@@ -14,7 +14,7 @@ import pandas as pd
 from dotenv import load_dotenv, find_dotenv
 
 from .evaluation import RegressionEvaluation
-from .utils import get_latest_model
+from ..utils import get_latest_model
 
 load_dotenv(find_dotenv())
 

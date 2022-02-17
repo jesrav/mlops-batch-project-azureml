@@ -7,7 +7,7 @@ import hydra
 from azureml.core import Workspace
 from azureml.core.authentication import ServicePrincipalAuthentication
 
-from .utils import get_latest_model
+from ..utils import get_latest_model
 logger = logging.getLogger(__name__)
 
 

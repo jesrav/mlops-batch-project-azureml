@@ -5,10 +5,8 @@ import json
 from pathlib import Path
 
 import numpy as np
-import scikitplot as skplt
 import matplotlib.pyplot as plt
 from sklearn.metrics import (
-    classification_report,
     mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,

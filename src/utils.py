@@ -1,14 +1,12 @@
 """utils for using MLFlow and Azure ML."""
-import math
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union
 import tempfile
 
 import mlflow
-from azureml.core import Model, Workspace, Experiment
-from azureml.core.authentication import ServicePrincipalAuthentication
+import numpy as np
+from azureml.core import Model, Workspace
 import mlflow.pyfunc
 
 
@@ -107,3 +105,7 @@ def get_latest_model(
     aml_model = Model(workspace=workspace, name=model_name, tags=tag_names)
     return LoadedMLFlowModel.from_aml_model(aml_model)
 
+
+def set_seed(seed=33):
+    np.random.seed(seed)
+    return seed
