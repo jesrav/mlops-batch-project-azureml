@@ -1,5 +1,5 @@
 $schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json 
-name: cpu-cluster2
+name: cpu-cluster
 type: amlcompute
 size: STANDARD_DS11_V2
 min_instances: 0
