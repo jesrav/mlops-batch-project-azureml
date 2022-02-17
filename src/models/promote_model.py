@@ -43,11 +43,11 @@ class SingleModelTest:
         self.test_data = test_data
         self.target_col = target_col
         self.max_mae = max_mae
-        self.model_mae = self._calc_model_mae(model, test_data, target_col)
+        self.predictions = model.predict(test_data)
+        self.model_mae = self._calc_model_mae(self.predictions, test_data, target_col)
 
     @staticmethod
-    def _calc_model_mae(model, test_data, target_col):
-        predictions = model.predict(test_data)
+    def _calc_model_mae(predictions, test_data, target_col):
         evaluation = RegressionEvaluation(
             y_true=test_data[target_col],
             y_pred=predictions
