@@ -20,6 +20,7 @@ dependencies:
     - pandera
     - evidently
     - mlflow
+    - azureml-core
     - azureml-mlflow
     - hydra-core
     - azureml-dataset-runtime

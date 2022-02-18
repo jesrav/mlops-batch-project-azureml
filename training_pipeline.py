@@ -1,8 +1,13 @@
 import os
 
-from azureml.core import Workspace, Run, Experiment, Dataset
+from azureml.core import Workspace, Experiment
 from azureml.pipeline.steps import PythonScriptStep
 from azureml.core.authentication import ServicePrincipalAuthentication
+from azureml.data import OutputFileDatasetConfig
+from azureml.core.runconfig import RunConfiguration
+from azureml.core import Environment 
+from azureml.pipeline.core import Pipeline
+
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -18,12 +23,10 @@ workspace = Workspace.get(
     auth=sp_auth,
     subscription_id=os.environ["SUBSCRIPTION_ID"],
 )
+
 experiment=Experiment(workspace=workspace, name="housing-model-training-pipeline")
 
-from azureml.core import Dataset
-from azureml.data import OutputFileDatasetConfig
-from azureml.core.runconfig import RunConfiguration
-from azureml.core import Environment 
+
 
 # Default datastore 
 datastore = workspace.get_default_datastore()
@@ -48,3 +51,8 @@ get_raw_data_step = PythonScriptStep(
     runconfig=aml_run_config,
     allow_reuse=True
 )
+
+test_pipeline = Pipeline(workspace=workspace, steps=[get_raw_data_step])
+
+test_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(test_pipeline)
+test_pipeline_run.wait_for_completion()
