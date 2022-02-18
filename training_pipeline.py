@@ -36,8 +36,7 @@ compute_target = workspace.compute_targets["cpu-cluster"]
 aml_run_config = RunConfiguration()
 aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-example-proj-env")
 
-get_raw_data_source_dir = "./src/data"
-entry_point = "get_raw_data.py"
+entry_point = "src/data/get_raw_data.py"
 
 output_data1 = OutputFileDatasetConfig(destination = (datastore, 'outputdataset/{run-id}'))
 output_data_dataset = output_data1.register_on_complete(name = 'raw_training_data')
@@ -45,8 +44,8 @@ output_data_dataset = output_data1.register_on_complete(name = 'raw_training_dat
 
 get_raw_data_step = PythonScriptStep(
     script_name=entry_point,
-    source_directory=get_raw_data_source_dir,
-    arguments=["--output", output_data1],
+    source_directory=".",
+    arguments=["data.raw_data", output_data1],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -55,4 +54,5 @@ get_raw_data_step = PythonScriptStep(
 test_pipeline = Pipeline(workspace=workspace, steps=[get_raw_data_step])
 
 test_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(test_pipeline)
+
 test_pipeline_run.wait_for_completion()
