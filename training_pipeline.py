@@ -85,6 +85,7 @@ preproces_training_data_step = PythonScriptStep(
    runconfig=aml_run_config,
    allow_reuse=True
 )
+
 test_pipeline = Pipeline(workspace=workspace, steps=[get_raw_data_step])
 
 test_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(test_pipeline)

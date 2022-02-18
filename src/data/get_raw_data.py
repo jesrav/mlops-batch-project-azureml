@@ -6,7 +6,6 @@ from typing import Optional
 import logging
 
 import hydra
-from hydra.utils import get_original_cwd
 from sklearn.datasets import fetch_california_housing
 import pandas as pd
 
@@ -38,7 +37,7 @@ def main(config):
         med_inc_mean_drift_percentage=config["main"].get("med_inc_mean_drift_percentage", None)
     )
 
-    out_path = Path(get_original_cwd()) / config['data']['raw_data']
+    out_path = Path(config['data']['raw_data']["folder"]) / config['data']['raw_data']["file_name"]
     logger.info(f"Save raw data to {out_path}")
     df.to_parquet(out_path)
 
