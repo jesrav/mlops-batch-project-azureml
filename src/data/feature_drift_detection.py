@@ -26,7 +26,7 @@ def get_dataset_from_run(run: Run, dataset_name: str) -> pd.DataFrame:
     ][0]["dataset"]
 
     with TemporaryDirectory() as tmpdirname:
-        local_model_input_path = tmpdirname + "model_input.parquet"
+        local_model_input_path = f'{tmpdirname}model_input.parquet'
         dataset.download(target_path=local_model_input_path, overwrite=False)
         df = pd.read_parquet(local_model_input_path)
     return df
@@ -95,8 +95,8 @@ def main(config):
         current_data=latest_inference_data
     )
     with TemporaryDirectory() as tmpdirname:
-        data_drift_report.save(tmpdirname + "/data_drift_report.html")
-        with open(tmpdirname + "/data_drift_profile.json", "w") as file:
+        data_drift_report.save(f'{tmpdirname}/data_drift_report.html')
+        with open(f'{tmpdirname}/data_drift_profile.json', "w") as file:
             file.write(data_drift_profile.json())
         mlflow.log_artifact(tmpdirname, artifact_path="drift-detection")
 
