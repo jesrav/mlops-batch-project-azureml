@@ -23,9 +23,6 @@ The project deploys pipelines for training, inference and drift detection as Azu
 
 ## Run project
 
-## Set environment variable 
-Copy the `.env_example` to `.env` and fill out the environment variables.
-
 ### Set azure cli defaults
 ```bash
 make set_az_deafaults

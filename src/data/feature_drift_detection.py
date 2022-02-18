@@ -3,23 +3,17 @@ Module for doing drift detection
 """
 from tempfile import TemporaryDirectory, tempdir
 import logging
-import os
 
 import hydra
 import pandas as pd
 import mlflow
-from azureml.core import Workspace, Model, Run, Experiment
-from azureml.pipeline.core import PipelineRun
-from azureml.core.authentication import ServicePrincipalAuthentication
+from azureml.core import Model, Run, Experiment
 
 from evidently.analyzers.data_drift_analyzer import DataDriftAnalyzer
 from evidently.dashboard import Dashboard
 from evidently.dashboard.tabs import DataDriftTab
 from evidently.model_profile.sections import DataDriftProfileSection
 from evidently.model_profile import Profile
-from dotenv import load_dotenv, find_dotenv
-
-load_dotenv(find_dotenv())
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +26,7 @@ def get_dataset_from_run(run: Run, dataset_name: str) -> pd.DataFrame:
     ][0]["dataset"]
 
     with TemporaryDirectory() as tmpdirname:
-        local_model_input_path = tmpdirname + "model_input.parquet"
+        local_model_input_path = f'{tmpdirname}model_input.parquet'
         dataset.download(target_path=local_model_input_path, overwrite=False)
         df = pd.read_parquet(local_model_input_path)
     return df
@@ -72,17 +66,7 @@ def get_latest_inference_data(workspace, experiment_name) -> pd.DataFrame:
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-    sp_auth = ServicePrincipalAuthentication(
-        tenant_id=os.environ["TENANT_ID"],
-        service_principal_id=os.environ["SERVICE_PRINCIPAL_ID"],
-        service_principal_password=os.environ["SERVICE_PRINCIPAL_PASSWORD"],
-    )
-    workspace = Workspace.get(
-        resource_group=os.environ["RESOURCE_GROUP"],
-        name=os.environ["WORKSPACE_NAME"],
-        auth=sp_auth,
-        subscription_id=os.environ["SUBSCRIPTION_ID"],
-    )
+    workspace = Run.get_context().experiment.workspace
 
     training_data = get_prod_model_training(
         workspace=workspace,
@@ -111,8 +95,8 @@ def main(config):
         current_data=latest_inference_data
     )
     with TemporaryDirectory() as tmpdirname:
-        data_drift_report.save(tmpdirname + "/data_drift_report.html")
-        with open(tmpdirname + "/data_drift_profile.json", "w") as file:
+        data_drift_report.save(f'{tmpdirname}/data_drift_report.html')
+        with open(f'{tmpdirname}/data_drift_profile.json', "w") as file:
             file.write(data_drift_profile.json())
         mlflow.log_artifact(tmpdirname, artifact_path="drift-detection")
 

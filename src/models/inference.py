@@ -4,8 +4,7 @@ import os
 
 import pandas as pd
 import hydra
-from azureml.core import Workspace
-from azureml.core.authentication import ServicePrincipalAuthentication
+from azureml.core import Run
 
 from ..utils import get_latest_model
 logger = logging.getLogger(__name__)
@@ -13,18 +12,7 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-
-    sp_auth = ServicePrincipalAuthentication(
-        tenant_id=os.environ["TENANT_ID"],
-        service_principal_id=os.environ["SERVICE_PRINCIPAL_ID"],
-        service_principal_password=os.environ["SERVICE_PRINCIPAL_PASSWORD"],
-    )
-    workspace = Workspace.get(
-        resource_group=os.environ["RESOURCE_GROUP"],
-        name=os.environ["WORKSPACE_NAME"],
-        auth=sp_auth,
-        subscription_id=os.environ["SUBSCRIPTION_ID"],
-    )
+    workspace = Run.get_context().experiment.workspace    
 
     logger.info("Load data for batch predictions.")
     df = pd.read_parquet(config["data"]["model_input"])

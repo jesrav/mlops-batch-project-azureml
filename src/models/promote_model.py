@@ -4,19 +4,14 @@ Script for promoting latest trained model to production if the performance on a 
 - is better than the current production model.
 """
 import logging
-import os
-from re import L
 
 import hydra
-from azureml.core import Workspace
-from azureml.core.authentication import ServicePrincipalAuthentication
+from azureml.core import Run
 import pandas as pd
-from dotenv import load_dotenv, find_dotenv
 
 from .evaluation import RegressionEvaluation
 from ..utils import get_latest_model
 
-load_dotenv(find_dotenv())
 
 logger = logging.getLogger(__name__)
 
@@ -123,17 +118,7 @@ class ChallengerModelTest:
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
 
-    sp_auth = ServicePrincipalAuthentication(
-        tenant_id=os.environ["TENANT_ID"],
-        service_principal_id=os.environ["SERVICE_PRINCIPAL_ID"],
-        service_principal_password=os.environ["SERVICE_PRINCIPAL_PASSWORD"],
-    )
-    workspace = Workspace.get(
-        resource_group=os.environ["RESOURCE_GROUP"],
-        name=os.environ["WORKSPACE_NAME"],
-        auth=sp_auth,
-        subscription_id=os.environ["SUBSCRIPTION_ID"],
-    )
+    workspace = Run.get_context().experiment.workspace
     
     logger.info("Load hold out test data.")
     test_data = pd.read_parquet(config["data"]["test_data"])
