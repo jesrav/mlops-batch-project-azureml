@@ -37,12 +37,12 @@ aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-ex
 # Get raw data step
 ################################################
 raw_training_data = OutputFileDatasetConfig()
-raw_training_data_registered = raw_training_data.register_on_complete(name = 'raw_training_data')
+raw_training_data = raw_training_data.register_on_complete(name = 'raw_training_data')
 
 get_raw_data_step = PythonScriptStep(
    script_name="src/data/get_raw_data.py",
    source_directory=".",
-   arguments=[f"data.raw_data={raw_training_data.arg_val}"],
+   arguments=[f"data.raw_data.folder={raw_training_data.arg_val}"],
    outputs=[raw_training_data],
    compute_target=compute_target,
    runconfig=aml_run_config,
