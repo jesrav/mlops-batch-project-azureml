@@ -1,4 +1,5 @@
 import os
+from unicodedata import name
 
 from azureml.core import Workspace, Experiment
 from azureml.pipeline.steps import PythonScriptStep
@@ -40,54 +41,70 @@ raw_training_data = OutputFileDatasetConfig()
 raw_training_data = raw_training_data.register_on_complete(name = 'raw_training_data')
 
 get_raw_data_step = PythonScriptStep(
-   script_name="src/data/get_raw_data.py",
-   source_directory=".",
-   arguments=[f"data.raw_data.folder={raw_training_data.arg_val}"],
-   outputs=[raw_training_data],
-   compute_target=compute_target,
-   runconfig=aml_run_config,
-   allow_reuse=True
+    name="get_raw_data",   
+    script_name="src/data/get_raw_data.py",
+    source_directory=".",
+    arguments=[f"data.raw_data.folder={raw_training_data.arg_val}"],
+    outputs=[raw_training_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
 )
 
 
 ################################################
 # Preprocess data step
 ################################################
-preprocesed_training_data = OutputFileDatasetConfig()
-preprocesed_training_data_registered = preprocesed_training_data.register_on_complete(
+clean_training_data = OutputFileDatasetConfig()
+clean_training_data = clean_training_data.register_on_complete(
     name = 'preprocesed_training_data'
 )
 
 preproces_training_data_step = PythonScriptStep(
-   script_name="src/data/process_data.py",
-   source_directory=".",
-   arguments=[f"data.clean_data={preprocesed_training_data.arg_val}"],
-   outputs=[preprocesed_training_data],
-   compute_target=compute_target,
-   runconfig=aml_run_config,
-   allow_reuse=True
+    name="preprocess_data", 
+    script_name="src/data/process_data.py",
+    source_directory=".",
+    arguments=[
+        f"data.clean_data.folder={clean_training_data.arg_val}",
+        f"data.raw_data.folder={raw_training_data.arg_val}",
+    ],
+    inputs=[raw_training_data.as_input()],
+    outputs=[clean_training_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
 )
 
 ################################################
 # Add features step
 ################################################
-preprocesed_training_data = OutputFileDatasetConfig()
-preprocesed_training_data_registered = preprocesed_training_data.register_on_complete(
+model_input_data = OutputFileDatasetConfig()
+model_input_data = model_input_data.register_on_complete(
     name = 'preprocesed_training_data'
 )
 
-preproces_training_data_step = PythonScriptStep(
-   script_name="src/data/process_data.py",
-   source_directory=".",
-   arguments=[f"data.clean_data={preprocesed_training_data.arg_val}"],
-   outputs=[preprocesed_training_data],
-   compute_target=compute_target,
-   runconfig=aml_run_config,
-   allow_reuse=True
+add_features_step = PythonScriptStep(
+    name="add_features",
+    script_name="src/data/add_features.py",
+    source_directory=".",
+    arguments=[
+        f"data.clean_data.folder={clean_training_data.arg_val}"
+        f"data.model_input.folder={model_input_data.arg_val}"
+    ],
+    inputs=[clean_training_data.as_input()],
+    outputs=[model_input_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
 )
 
-test_pipeline = Pipeline(workspace=workspace, steps=[get_raw_data_step])
 
-test_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(test_pipeline)
+steps = steps=[get_raw_data_step, preproces_training_data_step, add_features_step]
+training_pipeline = Pipeline(
+    workspace=workspace, 
+    steps=steps,
+)
 
-test_pipeline_run.wait_for_completion()
+training_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(training_pipeline)
+
+training_pipeline.wait_for_completion()
