@@ -11,6 +11,9 @@ from azureml.pipeline.core import Pipeline
 
 from dotenv import load_dotenv, find_dotenv
 
+################################################
+# Setup
+################################################
 load_dotenv(find_dotenv())
 
 sp_auth = ServicePrincipalAuthentication(
@@ -32,7 +35,8 @@ datastore = workspace.get_default_datastore()
 compute_target = workspace.compute_targets["cpu-cluster"]
 
 aml_run_config = RunConfiguration()
-aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-example-proj-env")
+aml_run_config.environment.name = "mlops-example-proj-env"
+aml_run_config.environment.version = "5.0"
 
 ################################################
 # Get raw data step
@@ -65,8 +69,8 @@ preproces_training_data_step = PythonScriptStep(
     script_name="src/data/process_data.py",
     source_directory=".",
     arguments=[
+        f"data.raw_data.folder={raw_training_data.as_input().arg_val}",
         f"data.clean_data.folder={clean_training_data.arg_val}",
-        f"data.raw_data.folder={raw_training_data.arg_val}",
     ],
     inputs=[raw_training_data.as_input()],
     outputs=[clean_training_data],
@@ -88,7 +92,7 @@ add_features_step = PythonScriptStep(
     script_name="src/data/add_features.py",
     source_directory=".",
     arguments=[
-        f"data.clean_data.folder={clean_training_data.arg_val}"
+        f"data.clean_data.folder={clean_training_data.as_input().arg_val}"
         f"data.model_input.folder={model_input_data.arg_val}"
     ],
     inputs=[clean_training_data.as_input()],

@@ -2,6 +2,7 @@
 Module to add features.
 """
 import logging
+from pathlib import Path
 
 import hydra
 import pandas as pd
@@ -24,13 +25,17 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
 
-    df = pd.read_parquet(config["data"]["clean_data"])
+    df = pd.read_parquet(
+        Path(config["data"]["clean_data"]["folder"]) / config["data"]["clean_data"]["filename"]
+    )
 
     logger.info('Add features.')
     df = add_features(df)
 
     logger.info('Save modelling input data.')
-    df.to_parquet(config["data"]["model_input"])
+    df.to_parquet(
+        Path(config["data"]["model_input"]["folder"]) / config["data"]["model_input"]["filename"]
+    )
 
 
 if __name__ == "__main__":
