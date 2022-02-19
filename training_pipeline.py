@@ -1,5 +1,4 @@
 import os
-from unicodedata import name
 
 from azureml.core import Workspace, Experiment
 from azureml.pipeline.steps import PythonScriptStep
@@ -61,19 +60,18 @@ get_raw_data_step = PythonScriptStep(
 # Preprocess data step
 ################################################
 clean_training_data = OutputFileDatasetConfig()
-clean_training_data = clean_training_data.register_on_complete(
-    name = 'preprocesed_training_data'
-)
+clean_training_data = clean_training_data.register_on_complete(name='clean_training_data')
+raw_data_as_input = raw_training_data.as_input()
 
 preproces_training_data_step = PythonScriptStep(
     name="preprocess_data", 
     script_name="src/data/process_data.py",
     source_directory=".",
     arguments=[
-        f"data.raw_data.folder={raw_training_data.as_input().arg_val}",
+        f"data.raw_data.folder={raw_data_as_input.arg_val}",
         f"data.clean_data.folder={clean_training_data.arg_val}",
     ],
-    inputs=[raw_training_data.as_input()],
+    inputs=[raw_data_as_input],
     outputs=[clean_training_data],
     compute_target=compute_target,
     runconfig=aml_run_config,
@@ -84,19 +82,18 @@ preproces_training_data_step = PythonScriptStep(
 # Add features step
 ################################################
 model_input_data = OutputFileDatasetConfig()
-model_input_data = model_input_data.register_on_complete(
-    name = 'preprocesed_training_data'
-)
+model_input_data = model_input_data.register_on_complete(name='model_input_training')
+clean_training_data_as_input = clean_training_data.as_input()
 
 add_features_step = PythonScriptStep(
     name="add_features",
     script_name="src/data/add_features.py",
     source_directory=".",
     arguments=[
-        f"data.clean_data.folder={clean_training_data.as_input().arg_val}"
-        f"data.model_input.folder={model_input_data.arg_val}"
+        f"data.clean_data.folder={clean_training_data_as_input.arg_val}",
+        f"data.model_input.folder={model_input_data.arg_val}",
     ],
-    inputs=[clean_training_data.as_input()],
+    inputs=[clean_training_data_as_input],
     outputs=[model_input_data],
     compute_target=compute_target,
     runconfig=aml_run_config,
@@ -112,4 +109,4 @@ training_pipeline = Pipeline(
 
 training_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(training_pipeline)
 
-training_pipeline.wait_for_completion()
+#training_pipeline_run.wait_for_completion()
