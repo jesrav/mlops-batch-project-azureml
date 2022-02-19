@@ -26,7 +26,7 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
 def main(config):
 
     df = pd.read_parquet(
-        Path(config["data"]["clean_data"]["folder"]) / config["data"]["clean_data"]["filename"]
+        Path(config["data"]["clean_data"]["folder"]) / config["data"]["clean_data"]["file_name"]
     )
 
     logger.info('Add features.')
@@ -34,7 +34,7 @@ def main(config):
 
     logger.info('Save modelling input data.')
     df.to_parquet(
-        Path(config["data"]["model_input"]["folder"]) / config["data"]["model_input"]["filename"]
+        Path(config["data"]["model_input"]["folder"]) / config["data"]["model_input"]["file_name"]
     )
 
 

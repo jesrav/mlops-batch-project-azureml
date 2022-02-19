@@ -17,7 +17,7 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
     df = pd.read_parquet(
-        Path(config["data"]["raw_data"]["folder"]) / config["data"]["raw_data"]["filename"]
+        Path(config["data"]["raw_data"]["folder"]) / config["data"]["raw_data"]["file_name"]
     )
 
     logger.info('Preprocess raw artifacts.')
@@ -25,7 +25,7 @@ def main(config):
 
     logger.info('Save preprocessed artifacts.')
     df.to_parquet(
-        Path(config["data"]["clean_data"]["folder"]) / config["data"]["clean_data"]["filename"]
+        Path(config["data"]["clean_data"]["folder"]) / config["data"]["clean_data"]["file_name"]
     )
 
 
