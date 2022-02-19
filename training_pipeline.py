@@ -35,8 +35,9 @@ datastore = workspace.get_default_datastore()
 compute_target = workspace.compute_targets["cpu-cluster"]
 
 aml_run_config = RunConfiguration()
-aml_run_config.environment.name = "mlops-example-proj-env"
-aml_run_config.environment.version = "5.0"
+aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-example-proj-env")
+#aml_run_config.environment.name = "mlops-example-proj-env"
+#aml_run_config.environment.version = "5"
 
 ################################################
 # Get raw data step
