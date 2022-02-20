@@ -6,7 +6,7 @@ from azureml.core.authentication import ServicePrincipalAuthentication
 from azureml.data import OutputFileDatasetConfig
 from azureml.core.runconfig import RunConfiguration
 from azureml.core import Environment 
-from azureml.pipeline.core import Pipeline
+from azureml.pipeline.core import Pipeline, StepSequence
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -104,7 +104,6 @@ add_features_step = PythonScriptStep(
 # Validate data step
 ################################################
 model_input_data_as_input = model_input_data.as_input(name='model_input_training')
-dummy_dependency = OutputFileDatasetConfig(name='dummy_dependency')
 
 validate_data_step = PythonScriptStep(
     name="validate_data",
@@ -114,7 +113,6 @@ validate_data_step = PythonScriptStep(
         f"data.model_input.folder={model_input_data_as_input.arg_val}",
     ],
     inputs=[model_input_data_as_input],
-    outputs=[dummy_dependency],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -137,7 +135,7 @@ data_segragation_step = CommandStep(
         f"data.test_data.folder={test_data.arg_val} "
     ),
     source_directory=".",
-    inputs=[model_input_data_as_input, dummy_dependency.as_input(name="dummy_dependency")],
+    inputs=[model_input_data_as_input],
     outputs=[train_validate_data, test_data],
     compute_target=compute_target,
     runconfig=aml_run_config,
@@ -147,7 +145,6 @@ data_segragation_step = CommandStep(
 ################################################
 # Train and evaluate step
 ################################################
-dummy_model_dependency = OutputFileDatasetConfig(name='dummy_model_dependency')
 train_validate_data_as_input = train_validate_data.as_input(name='train_validate_data')
 
 train_and_evaluate_step = CommandStep(
@@ -158,7 +155,6 @@ train_and_evaluate_step = CommandStep(
     ),
     source_directory=".",
     inputs=[train_validate_data_as_input],
-    outputs=[dummy_model_dependency],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -167,30 +163,43 @@ train_and_evaluate_step = CommandStep(
 ################################################
 # Test and promote model step
 ################################################
+test_data_as_input = test_data.as_input(name="test_data")
+
 test_and_promote_model_step = CommandStep(
     name="test_and_promote_model",
-    command="python -m src.models.promote_model",
+    command=(
+        "python -m src.models.promote_model "
+        f"data.test_data.folder={test_data_as_input.arg_val} "
+    ),
     source_directory=".",
-    inputs=[dummy_model_dependency.as_input(name='dummy_model_dependency')],
+    inputs=[test_data_as_input],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
 )
 
-steps = steps=[
+################################################
+# Combine steps into training pipeline
+################################################
+data_prep_steps = [
     get_raw_data_step,
     preproces_training_data_step, 
     add_features_step, 
-    validate_data_step,
-    data_segragation_step, 
-    train_and_evaluate_step,
-    test_and_promote_model_step,
 ]
+model_steps = [
+    data_segragation_step,
+    train_and_evaluate_step
+]
+training_pipeline_steps = StepSequence(steps=[
+    data_prep_steps, 
+    validate_data_step, 
+    model_steps ,
+    test_and_promote_model_step,
+])
 training_pipeline = Pipeline(
     workspace=workspace, 
-    steps=steps,
+    steps=training_pipeline_steps,
 )
-
 training_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(training_pipeline)
 
 #training_pipeline_run.wait_for_completion()
