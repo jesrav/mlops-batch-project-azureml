@@ -57,15 +57,15 @@ get_raw_data_step = PythonScriptStep(
 
 
 ################################################
-# Preprocess data step
+# Clean and validate step
 ################################################
 clean_training_data = OutputFileDatasetConfig(name='clean_data_training')
 clean_training_data = clean_training_data.register_on_complete(name='clean_data_training')
 raw_data_as_input = raw_training_data.as_input(name="raw_data_training")
 
-preproces_training_data_step = PythonScriptStep(
-    name="preprocess_data", 
-    script_name="src/data/process_data.py",
+clean_and_validate_step = PythonScriptStep(
+    name="clean_and_validate", 
+    script_name="src/data/clean_and_validate.py",
     source_directory=".",
     arguments=[
         f"data.raw_data.folder={raw_data_as_input.arg_val}",
@@ -101,30 +101,13 @@ add_features_step = PythonScriptStep(
 )
 
 ################################################
-# Validate data step
-################################################
-model_input_data_as_input = model_input_data.as_input(name='model_input_training')
-
-validate_data_step = PythonScriptStep(
-    name="validate_data",
-    script_name="src/data/validate_data.py",
-    source_directory=".",
-    arguments=[
-        f"data.model_input.folder={model_input_data_as_input.arg_val}",
-    ],
-    inputs=[model_input_data_as_input],
-    compute_target=compute_target,
-    runconfig=aml_run_config,
-    allow_reuse=True
-)
-
-################################################
 # Data segregation step
 ################################################
 train_validate_data = OutputFileDatasetConfig(name='train_validate_data')
 train_validate_data = train_validate_data.register_on_complete(name='train_validate_data')
 test_data = OutputFileDatasetConfig(name='test_data')
 test_data = test_data.register_on_complete(name='test_data')
+model_input_data_as_input = model_input_data.as_input(name='model_input_training')
 
 data_segragation_step = CommandStep(
     name="data_segragation",
@@ -177,28 +160,22 @@ test_and_promote_model_step = CommandStep(
     runconfig=aml_run_config,
     allow_reuse=True
 )
+test_and_promote_model_step.run_after(train_and_evaluate_step)
 
 ################################################
 # Combine steps into training pipeline
 ################################################
-data_prep_steps = [
+training_steps = [
     get_raw_data_step,
-    preproces_training_data_step, 
+    clean_and_validate_step, 
     add_features_step, 
-]
-model_steps = [
     data_segragation_step,
-    train_and_evaluate_step
-]
-training_pipeline_steps = StepSequence(steps=[
-    data_prep_steps, 
-    validate_data_step, 
-    model_steps ,
+    train_and_evaluate_step,
     test_and_promote_model_step,
-])
+]
 training_pipeline = Pipeline(
     workspace=workspace, 
-    steps=training_pipeline_steps,
+    steps=test_and_promote_model_step,
 )
 training_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(training_pipeline)
 
