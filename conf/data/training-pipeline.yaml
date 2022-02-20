@@ -8,7 +8,7 @@ model_input:
   folder: "data/training_pipeline/processed"
   file_name: "modelling_data.parquet"
 train_validate_data: 
-  foler: "data/training_pipeline/processed" 
+  folder: "data/training_pipeline/processed" 
   file_name: "train_validate_data.parquet"
 test_data: 
   folder: "data/training_pipeline/processed"
