@@ -6,9 +6,8 @@ import logging
 import hydra
 
 from .get_raw_data import get_raw_data
-from .process_data import preprocess
 from .add_features import add_features
-from .validate_data import validate_model_input
+from .clean_and_validate import preprocess, validate_model_input
 
 logger = logging.getLogger(__name__)
 

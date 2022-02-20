@@ -11,13 +11,11 @@ train_pipeline: data_segregation train_random_forest test_and_promote_model
 get_raw_data_train:
 	python -m src.data.get_raw_data
 
-preprocess_data_train:
-	python -m src.data.process_data
+clean_and_validate_train:
+	python -m src.data.clean_and_validate
+
 add_features_train:
 	python -m src.data.add_features
-
-validate_model_input_train:
-	python -m src.data.validate_data
 
 data_segregation:
 	python -m src.data.data_segregation
@@ -40,14 +38,11 @@ inference_pipeline: validate_model_input_inference batch_inference
 get_raw_data_inference:
 	python -m src.data.get_raw_data main=inference-pipeline data=inference-pipeline
 
-preprocess_data_inference:
+clean_and_validate_train_inference:
 	python -m src.data.process_data main=inference-pipeline data=inference-pipeline
 
 add_features_inference:
 	python -m src.data.add_features main=inference-pipeline data=inference-pipeline
-
-validate_model_input_inference:
-	python -m src.data.validate_data main=inference-pipeline data=inference-pipeline
 
 batch_inference:
 	python -m src.models.inference.py main=inference-pipeline data=inference-pipeline
