@@ -112,8 +112,7 @@ validate_data_step = PythonScriptStep(
     arguments=[
         f"data.model_input.folder={model_input_data_as_input.arg_val}",
     ],
-    inputs=[clean_training_data_as_input],
-    outputs=[model_input_data],
+    inputs=[model_input_data_as_input],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -123,14 +122,13 @@ validate_data_step = PythonScriptStep(
 # Data segregation step
 ################################################
 train_validate_data = OutputFileDatasetConfig(name='train_validate_data')
-train_validate_data = model_input_data.register_on_complete(name='train_validate_data')
+train_validate_data = train_validate_data.register_on_complete(name='train_validate_data')
 test_data = OutputFileDatasetConfig(name='test_data')
-test_data = model_input_data.register_on_complete(name='test_data')
-model_input_data_as_input = model_input_data.as_input(name='model_input_training')
+test_data = test_data.register_on_complete(name='test_data')
 
 data_segragation_step = PythonScriptStep(
     name="data_segragation",
-    script_name="src/data/data_segragation.py",
+    script_name="src/data/data_segregation.py",
     source_directory=".",
     arguments=[
         f"data.model_input.folder={model_input_data_as_input.arg_val}",
@@ -152,7 +150,7 @@ train_validate_data_as_input = train_validate_data.as_input(name='train_validate
 
 train_and_evaluate_step = PythonScriptStep(
     name="train_and_evaluate",
-    script_name="src/data/train_and_evaluate.py",
+    script_name="src/models/train_and_evaluate.py",
     source_directory=".",
     arguments=[
         f"data.train_validate_data.folder={train_validate_data_as_input.arg_val}",
@@ -171,7 +169,7 @@ dummy_model_data_as_input = dummy_model_data.as_input(name='dummy_model')
 
 test_and_promote_model_step = PythonScriptStep(
     name="test_and_promote_model",
-    script_name="src/data/promote_model.py",
+    script_name="src/models/promote_model.py",
     source_directory=".",
     inputs=[dummy_model_data_as_input],
     compute_target=compute_target,
