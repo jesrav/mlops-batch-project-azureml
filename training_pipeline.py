@@ -1,7 +1,7 @@
 import os
 
 from azureml.core import Workspace, Experiment
-from azureml.pipeline.steps import PythonScriptStep
+from azureml.pipeline.steps import PythonScriptStep, CommandStep
 from azureml.core.authentication import ServicePrincipalAuthentication
 from azureml.data import OutputFileDatasetConfig
 from azureml.core.runconfig import RunConfiguration
@@ -104,6 +104,7 @@ add_features_step = PythonScriptStep(
 # Validate data step
 ################################################
 model_input_data_as_input = model_input_data.as_input(name='model_input_training')
+dummy_dependency = OutputFileDatasetConfig(name='dummy_dependency')
 
 validate_data_step = PythonScriptStep(
     name="validate_data",
@@ -113,6 +114,7 @@ validate_data_step = PythonScriptStep(
         f"data.model_input.folder={model_input_data_as_input.arg_val}",
     ],
     inputs=[model_input_data_as_input],
+    outputs=[dummy_dependency],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -126,16 +128,16 @@ train_validate_data = train_validate_data.register_on_complete(name='train_valid
 test_data = OutputFileDatasetConfig(name='test_data')
 test_data = test_data.register_on_complete(name='test_data')
 
-data_segragation_step = PythonScriptStep(
+data_segragation_step = CommandStep(
     name="data_segragation",
-    script_name="src/data/data_segregation.py",
+    command=(
+        "python -m src.data.data_segregation "
+        f"data.model_input.folder={model_input_data_as_input.arg_val} "
+        f"data.train_validate_data.folder={train_validate_data.arg_val} "
+        f"data.test_data.folder={test_data.arg_val} "
+    ),
     source_directory=".",
-    arguments=[
-        f"data.model_input.folder={model_input_data_as_input.arg_val}",
-        f"data.train_validate_data.folder={train_validate_data.arg_val}",
-        f"data.test_data.folder={test_data.arg_val}",
-    ],
-    inputs=[model_input_data_as_input],
+    inputs=[model_input_data_as_input, dummy_dependency.as_input(name="dummy_dependency")],
     outputs=[train_validate_data, test_data],
     compute_target=compute_target,
     runconfig=aml_run_config,
@@ -145,18 +147,18 @@ data_segragation_step = PythonScriptStep(
 ################################################
 # Train and evaluate step
 ################################################
-dummy_model_data = OutputFileDatasetConfig(name='dummy_model')
+dummy_model_dependency = OutputFileDatasetConfig(name='dummy_model_dependency')
 train_validate_data_as_input = train_validate_data.as_input(name='train_validate_data')
 
-train_and_evaluate_step = PythonScriptStep(
+train_and_evaluate_step = CommandStep(
     name="train_and_evaluate",
-    script_name="src/models/train_and_evaluate.py",
+    command=(
+        "python -m src.models.train_and_evaluate "
+        f"data.train_validate_data.folder={train_validate_data_as_input.arg_val}"
+    ),
     source_directory=".",
-    arguments=[
-        f"data.train_validate_data.folder={train_validate_data_as_input.arg_val}",
-    ],
     inputs=[train_validate_data_as_input],
-    outputs=[dummy_model_data],
+    outputs=[dummy_model_dependency],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
@@ -165,13 +167,11 @@ train_and_evaluate_step = PythonScriptStep(
 ################################################
 # Test and promote model step
 ################################################
-dummy_model_data_as_input = dummy_model_data.as_input(name='dummy_model')
-
-test_and_promote_model_step = PythonScriptStep(
+test_and_promote_model_step = CommandStep(
     name="test_and_promote_model",
-    script_name="src/models/promote_model.py",
+    command="python -m src.models.promote_model",
     source_directory=".",
-    inputs=[dummy_model_data_as_input],
+    inputs=[dummy_model_dependency.as_input(name='dummy_model_dependency')],
     compute_target=compute_target,
     runconfig=aml_run_config,
     allow_reuse=True
