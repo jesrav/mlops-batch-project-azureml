@@ -4,6 +4,7 @@ Script for promoting latest trained model to production if the performance on a 
 - is better than the current production model.
 """
 import logging
+from pathlib import Path
 
 import hydra
 from azureml.core import Run
@@ -121,7 +122,10 @@ def main(config):
     workspace = Run.get_context().experiment.workspace
     
     logger.info("Load hold out test data.")
-    test_data = pd.read_parquet(config["data"]["test_data"])
+    test_data = pd.read_parquet(
+        Path(config["data"]["test_data"]["folder"]) 
+        / config["data"]["test_data"]["file_name"]  
+    )
 
     logger.info("Loading latest trained model.")
     loaded_model_challenger = get_latest_model(workspace, config["main"]["registered_model_name"])

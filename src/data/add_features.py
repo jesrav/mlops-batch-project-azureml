@@ -37,6 +37,6 @@ def main(config):
         Path(config["data"]["model_input"]["folder"]) / config["data"]["model_input"]["file_name"]
     )
 
-
+    
 if __name__ == "__main__":
     main()

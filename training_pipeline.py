@@ -41,8 +41,8 @@ aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-ex
 ################################################
 # Get raw data step
 ################################################
-raw_training_data = OutputFileDatasetConfig()
-raw_training_data = raw_training_data.register_on_complete(name = 'raw_training_data')
+raw_training_data = OutputFileDatasetConfig(name="raw_data_training")
+raw_training_data = raw_training_data.register_on_complete(name="raw_data_training")
 
 get_raw_data_step = PythonScriptStep(
     name="get_raw_data",   
@@ -59,9 +59,9 @@ get_raw_data_step = PythonScriptStep(
 ################################################
 # Preprocess data step
 ################################################
-clean_training_data = OutputFileDatasetConfig()
-clean_training_data = clean_training_data.register_on_complete(name='clean_training_data')
-raw_data_as_input = raw_training_data.as_input()
+clean_training_data = OutputFileDatasetConfig(name='clean_data_training')
+clean_training_data = clean_training_data.register_on_complete(name='clean_data_training')
+raw_data_as_input = raw_training_data.as_input(name="raw_data_training")
 
 preproces_training_data_step = PythonScriptStep(
     name="preprocess_data", 
@@ -81,9 +81,9 @@ preproces_training_data_step = PythonScriptStep(
 ################################################
 # Add features step
 ################################################
-model_input_data = OutputFileDatasetConfig()
+model_input_data = OutputFileDatasetConfig(name='model_input_training')
 model_input_data = model_input_data.register_on_complete(name='model_input_training')
-clean_training_data_as_input = clean_training_data.as_input()
+clean_training_data_as_input = clean_training_data.as_input(name='clean_data_training')
 
 add_features_step = PythonScriptStep(
     name="add_features",
@@ -100,8 +100,94 @@ add_features_step = PythonScriptStep(
     allow_reuse=True
 )
 
+################################################
+# Validate data step
+################################################
+model_input_data_as_input = model_input_data.as_input(name='model_input_training')
 
-steps = steps=[get_raw_data_step, preproces_training_data_step, add_features_step]
+validate_data_step = PythonScriptStep(
+    name="validate_data",
+    script_name="src/data/validate_data.py",
+    source_directory=".",
+    arguments=[
+        f"data.model_input.folder={model_input_data_as_input.arg_val}",
+    ],
+    inputs=[clean_training_data_as_input],
+    outputs=[model_input_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
+)
+
+################################################
+# Data segregation step
+################################################
+train_validate_data = OutputFileDatasetConfig(name='train_validate_data')
+train_validate_data = model_input_data.register_on_complete(name='train_validate_data')
+test_data = OutputFileDatasetConfig(name='test_data')
+test_data = model_input_data.register_on_complete(name='test_data')
+model_input_data_as_input = model_input_data.as_input(name='model_input_training')
+
+data_segragation_step = PythonScriptStep(
+    name="data_segragation",
+    script_name="src/data/data_segragation.py",
+    source_directory=".",
+    arguments=[
+        f"data.model_input.folder={model_input_data_as_input.arg_val}",
+        f"data.train_validate_data.folder={train_validate_data.arg_val}",
+        f"data.test_data.folder={test_data.arg_val}",
+    ],
+    inputs=[model_input_data_as_input],
+    outputs=[train_validate_data, test_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
+)
+
+################################################
+# Train and evaluate step
+################################################
+dummy_model_data = OutputFileDatasetConfig(name='dummy_model')
+train_validate_data_as_input = train_validate_data.as_input(name='train_validate_data')
+
+train_and_evaluate_step = PythonScriptStep(
+    name="train_and_evaluate",
+    script_name="src/data/train_and_evaluate.py",
+    source_directory=".",
+    arguments=[
+        f"data.train_validate_data.folder={train_validate_data_as_input.arg_val}",
+    ],
+    inputs=[train_validate_data_as_input],
+    outputs=[dummy_model_data],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
+)
+
+################################################
+# Test and promote model step
+################################################
+dummy_model_data_as_input = dummy_model_data.as_input(name='dummy_model')
+
+test_and_promote_model_step = PythonScriptStep(
+    name="test_and_promote_model",
+    script_name="src/data/promote_model.py",
+    source_directory=".",
+    inputs=[dummy_model_data_as_input],
+    compute_target=compute_target,
+    runconfig=aml_run_config,
+    allow_reuse=True
+)
+
+steps = steps=[
+    get_raw_data_step,
+    preproces_training_data_step, 
+    add_features_step, 
+    validate_data_step,
+    data_segragation_step, 
+    train_and_evaluate_step,
+    test_and_promote_model_step,
+]
 training_pipeline = Pipeline(
     workspace=workspace, 
     steps=steps,

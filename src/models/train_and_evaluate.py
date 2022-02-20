@@ -7,6 +7,7 @@ src.models.model_pipeliene_configs.BasePipelineConfig is passed supplied through
 import logging
 from tempfile import TemporaryDirectory
 from typing import Type
+from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import cross_val_predict
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def train_evaluate(
+    df: pd.DataFrame,
     pipeline_class: Type[model_pipeliene_configs.BasePipelineConfig],
     config: dict,
 ):
@@ -32,9 +34,6 @@ def train_evaluate(
     mlflow.log_params(config["model"]["params"])
 
     target_column = config["main"]["target_column"]
-
-    logger.info("Load data for training model.")
-    df = pd.read_parquet(config["data"]["train_validate_data"])
 
     logger.info("Initialize ml pipeline object.")
     pipeline = pipeline_class.get_pipeline(**(config["model"]["params"]))
@@ -77,8 +76,15 @@ def train_evaluate(
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
+    logger.info("Load data for training model.")
+    df = pd.read_parquet(
+        Path(config["data"]["train_validate_data"]["folder"]) 
+        / config["data"]["train_validate_data"]["file_name"]   
+    )
+
     model_class = getattr(model_pipeliene_configs, config["model"]["ml_pipeline_config"])
     train_evaluate(
+        df=df,
         pipeline_class=model_class,
         config=config,
     )

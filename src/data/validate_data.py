@@ -1,5 +1,6 @@
 """Module to validate model input data."""
 import logging
+from pathlib import Path
 
 import hydra
 import pandas as pd
@@ -24,7 +25,10 @@ def validate_model_input(df: pd.DataFrame) -> pd.DataFrame:
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
         logger.info('Read model input data.')
-        df = pd.read_parquet(config["data"]["model_input"])
+        df = pd.read_parquet(
+            Path(config["data"]["model_input"]["folder"]) 
+            / config["data"]["model_input"]["file_name"]    
+        )
 
         logger.info('Validate model input.')
         df = validate_model_input(df)
