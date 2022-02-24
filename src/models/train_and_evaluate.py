@@ -13,6 +13,7 @@ import pandas as pd
 from sklearn.model_selection import cross_val_predict
 import hydra
 import mlflow
+from azureml.core import Run, Model
 
 from ..utils import MLFlowModelWrapper, set_seed
 from ..models.evaluation import RegressionEvaluation

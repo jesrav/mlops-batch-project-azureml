@@ -33,7 +33,7 @@ def log_promotion_status(model_id: str, additional_info: str, model_to_be_promot
 
 
 class SingleModelTest:
-
+    """Tests of a single model"""
     def __init__(self, model, test_data, target_col, max_mae):
         self.model = model
         self.test_data = test_data
@@ -79,6 +79,7 @@ class SingleModelTest:
 
 
 class ChallengerModelTest:
+    """Tests that compare a new challenger model to another model."""
     def __init__(self, model_challenger, model_current, test_data, target_col):
         self.model_challenger = model_challenger
         self.model_current = model_current
