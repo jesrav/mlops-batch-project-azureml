@@ -6,7 +6,7 @@ from azureml.core.authentication import ServicePrincipalAuthentication
 from azureml.data import OutputFileDatasetConfig
 from azureml.core.runconfig import RunConfiguration
 from azureml.core import Environment 
-from azureml.pipeline.core import Pipeline, StepSequence
+from azureml.pipeline.core import Pipeline
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -27,8 +27,6 @@ workspace = Workspace.get(
     subscription_id=os.environ["SUBSCRIPTION_ID"],
 )
 
-experiment=Experiment(workspace=workspace, name="housing-model-training-pipeline")
-
 datastore = workspace.get_default_datastore()
 
 compute_target = workspace.compute_targets["cpu-cluster"]
@@ -43,6 +41,10 @@ aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-ex
 ################################################
 raw_training_data = OutputFileDatasetConfig(name="raw_data_training")
 raw_training_data = raw_training_data.register_on_complete(name="raw_data_training")
+
+raw_training_data = PipelineData('raw_training_data', datastore=datastore).as_dataset()
+raw_training_data = raw_training_data.register(name='prepared_weather_ds', create_new_version=True)
+
 
 get_raw_data_step = PythonScriptStep(
     name="get_raw_data",   
@@ -177,6 +179,6 @@ training_pipeline = Pipeline(
     workspace=workspace, 
     steps=test_and_promote_model_step,
 )
-training_pipeline_run = Experiment(workspace, 'test_pipeline_exp').submit(training_pipeline)
+training_pipeline_run = Experiment(workspace, 'housing-model-training-pipeline').submit(training_pipeline)
 
 #training_pipeline_run.wait_for_completion()
