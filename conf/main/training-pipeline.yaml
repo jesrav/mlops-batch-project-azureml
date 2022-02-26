@@ -2,6 +2,6 @@ project_name: housing-model
 experiment_name: housing-model-training-pipeline
 target_column: "median_house_price"
 registered_model_name: "housing_model"
-run_locally: false
 max_mae_to_promote: 0.5
 min_percent_perfomance_boost_to_promote: 0.01
+run_locally: false

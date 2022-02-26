@@ -13,6 +13,8 @@ train_validate_data:
 test_data: 
   folder: "data/training_pipeline/processed"
   file_name: "test_data.parquet"
+model:
+  folder: "artifacts/model"
 predictions:   
   folder: "placeholder"
   file_name: "placeholder"

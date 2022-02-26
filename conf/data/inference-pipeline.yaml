@@ -9,3 +9,5 @@ model_input:
 predictions:   
   folder: "data/inference_pipeline/processed"
   file_name: "predictions.parquet"
+model:
+  folder: "artifacts/model"

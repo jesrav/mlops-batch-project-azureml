@@ -1,12 +1,11 @@
 include .env
 export
 
-
 ###############################################################
 # Train pipeline
 ###############################################################
-train_pipeline: get_raw_data_train preprocess_data_train add_features_train validate_model_input_train
-train_pipeline: data_segregation train_random_forest test_and_promote_model
+train_pipeline: get_raw_data_train clean_and_validate_train add_features_train
+train_pipeline: data_segregation train_random_forest
 
 get_raw_data_train:
 	python -m src.data.get_raw_data
@@ -26,8 +25,6 @@ train_ridge:
 train_random_forest:
 	python -m src.models.train_and_evaluate model=random_forest main.run_locally=true
 
-test_and_promote_model:
-	python -m src.models.promote_model
 
 ###############################################################
 # Inference pipeline
