@@ -35,10 +35,10 @@ class LoadedMLFlowModel:
     """
     model: mlflow.pyfunc.PyFuncModel
     model_meta_data: ModelMetaData
-    aml_model: Model
+    aml_model: Union[Model, None]
 
     @classmethod
-    def from_aml_model(cls, aml_model: Model):
+    def from_aml_model(cls, aml_model: Model) -> 'LoadedMLFlowModel':
         """Get a `LoadedModel`from a Azure ML Model"""
         model_meta_data = ModelMetaData(model_id=aml_model.id, run_id=aml_model.run_id)
         temp_dir = tempfile.mkdtemp()
@@ -46,13 +46,30 @@ class LoadedMLFlowModel:
         model = mlflow.pyfunc.load_model("file:" + str(temp_dir / Path("model")))
         return LoadedMLFlowModel(model=model, model_meta_data=model_meta_data, aml_model=aml_model)
 
+    @classmethod
+    def from_local_path(cls, model_path: str) -> 'LoadedMLFlowModel':
+        """Get a `LoadedModel`from a local path.
+        
+        Model version, run id and aml model object are not available in this case.
+        """
+        model = mlflow.pyfunc.load_model(model_uri=model_path)
+        return LoadedMLFlowModel(
+            model=model, 
+            model_meta_data=ModelMetaData(model_id="none", run_id="none"), 
+            aml_model=None
+        )
+
     def promote_to_prod(self):
         """Promote model to production"""
+        if not self.aml_model:
+            raise ValueError("Model not registered in AML. Can not promote.")
         self.aml_model.add_tags({"prod": True})
         self.aml_model.update_tags_properties()
 
     def demote_from_prod(self):
         """Demote model from production"""
+        if not self.aml_model:
+            raise ValueError("Model not registered in AML. Can not demote.")
         self.aml_model.remove_tags(["prod"])
         self.aml_model.update_tags_properties()
 

@@ -7,7 +7,7 @@ import hydra
 import mlflow
 from azureml.core import Run
 
-from ..utils import get_latest_model
+from ..utils import get_latest_model, LoadedMLFlowModel
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +22,7 @@ def main(config):
     if config["main"]["run_locally"]:
         model_path = config["data"]["model"]["folder"]
         logger.info(f"Load model from local folder {model_path}.")
-        loaded_model = mlflow.pyfunc.load_model(model_uri=str(model_path))
+        loaded_model = LoadedMLFlowModel.from_local_path(model_path=str(model_path))
     else:
         logger.info("Load model from model registry.")
         workspace = Run.get_context().experiment.workspace  
@@ -37,7 +37,9 @@ def main(config):
     df['model_id'] = loaded_model.model_meta_data.model_id
 
     logger.info("save predictions.")
-    df.to_parquet(config['data']['predictions'])
+    df.to_parquet(
+        Path(config["data"]["predictions"]["folder"]) / config["data"]["predictions"]["file_name"]
+    )
 
 
 if __name__ == '__main__':
