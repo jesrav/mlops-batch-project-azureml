@@ -2,6 +2,7 @@
 Module to add features.
 """
 import logging
+from pathlib import Path
 
 import hydra
 
@@ -30,8 +31,9 @@ def main(config):
     df = validate_model_input(df)
 
     logger.info('Save model input data.')
-    df.to_parquet(config["data"]["model_input"])
-
+    df.to_parquet(
+        Path(config["data"]["model_input"]["folder"]) / config["data"]["model_input"]["file_name"]
+    )
 
 if __name__ == "__main__":
     main()

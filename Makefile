@@ -8,16 +8,16 @@ train_pipeline: get_raw_data_train clean_and_validate_train add_features_train
 train_pipeline: data_segregation train_random_forest
 
 get_raw_data_train:
-	python -m src.data.get_raw_data
+	python -m src.data.get_raw_data main.run_locally=true
 
 clean_and_validate_train:
-	python -m src.data.clean_and_validate
+	python -m src.data.clean_and_validate main.run_locally=true
 
 add_features_train:
-	python -m src.data.add_features
+	python -m src.data.add_features main.run_locally=true
 
 data_segregation:
-	python -m src.data.data_segregation
+	python -m src.data.data_segregation main.run_locally=true
 
 train_ridge:
 	python -m src.models.train_and_evaluate model=ridge main.run_locally=true
@@ -29,20 +29,13 @@ train_random_forest:
 ###############################################################
 # Inference pipeline
 ###############################################################
-inference_pipeline: get_raw_data_inference preprocess_data_inference add_features_inference
-inference_pipeline: validate_model_input_inference batch_inference
+inference_pipeline: prepare_data_pipeline batch_inference
 
-get_raw_data_inference:
-	python -m src.data.get_raw_data main=inference-pipeline data=inference-pipeline
-
-clean_and_validate_train_inference:
-	python -m src.data.process_data main=inference-pipeline data=inference-pipeline
-
-add_features_inference:
-	python -m src.data.add_features main=inference-pipeline data=inference-pipeline
+prepare_data_pipeline:
+	python -m src.data.prepare_data_pipeline main=inference-pipeline data=inference-pipeline main.run_locally=true
 
 batch_inference:
-	python -m src.models.inference.py main=inference-pipeline data=inference-pipeline
+	python -m src.models.inference main=inference-pipeline data=inference-pipeline main.run_locally=true
 
 
 ###############################################################

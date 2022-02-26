@@ -1,8 +1,3 @@
-  folder: "data/inference_pipeline/raw"
-  file_name: "raw_data.parquet"
-clean_data: 
-  folder: "data/inference_pipeline/processed"
-  file_name: "clean_data.parquet"
 model_input: 
   folder: "data/inference_pipeline/processed"
   file_name: "modelling_data.parquet"
