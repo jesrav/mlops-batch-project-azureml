@@ -45,7 +45,7 @@ model_input_data = model_input_data.register_on_complete(name='model_input_train
 get_and_prepare_data_step = CommandStep(
     name="get_raw_data",  
     command=(
-        "python -m src.models.prepare_data_pipeline "
+        "python -m src.data.prepare_data_pipeline "
         f"data.model_input.folder={model_input_data.arg_val}"
     ), 
     source_directory=".",
