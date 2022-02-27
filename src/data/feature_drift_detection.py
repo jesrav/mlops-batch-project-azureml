@@ -51,7 +51,7 @@ def get_latest_inference_data(workspace, experiment_name) -> pd.DataFrame:
     for step in steps:
         datasets = datasets | step.get_outputs()
     try: 
-        inference_input_dataset = datasets["model_input"]
+        inference_input_dataset = datasets["model_input_inference"]
     except KeyError:
         raise KeyError("Model input dataset is not output from any of the pipeline steps.")
 

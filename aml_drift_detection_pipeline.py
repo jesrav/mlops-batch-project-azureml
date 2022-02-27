@@ -41,7 +41,7 @@ feature_drift_detection_step = CommandStep(
     name="feature_drift_detection",  
     command=(
         "python -m src.data.feature_drift_detection "
-        "main=drift_detection-pipeline"
+        "main=drift-detection-pipeline"
     ), 
     source_directory=".",
     compute_target=compute_target,

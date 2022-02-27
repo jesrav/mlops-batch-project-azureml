@@ -45,6 +45,7 @@ get_and_prepare_data_step = CommandStep(
     command=(
         "python -m src.data.prepare_data_pipeline "
         "main=inference-pipeline "
+        "data=inference-pipeline "
         f"data.model_input.folder={model_input_data.arg_val}"
     ), 
     source_directory=".",
@@ -67,8 +68,9 @@ batch_inference_step = CommandStep(
     command=(
         "python -m src.models.inference "
         "main=inference-pipeline "
+        "data=inference-pipeline "
         f"data.model_input.folder={model_input_data_as_input.arg_val} "
-        f"data.prediction_data.folder={prediction_data.arg_val}"
+        f"data.predictions.folder={prediction_data.arg_val}"
     ),
     source_directory=".",
     inputs=[model_input_data_as_input],
