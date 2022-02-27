@@ -15,6 +15,7 @@ from dotenv import load_dotenv, find_dotenv
 ################################################
 load_dotenv(find_dotenv())
 
+
 sp_auth = ServicePrincipalAuthentication(
     tenant_id=os.environ["TENANT_ID"],
     service_principal_id=os.environ["SERVICE_PRINCIPAL_ID"],
@@ -33,17 +34,13 @@ compute_target = workspace.compute_targets["cpu-cluster"]
 
 aml_run_config = RunConfiguration()
 aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-example-proj-env")
-#aml_run_config.environment.name = "mlops-example-proj-env"
-#aml_run_config.environment.version = "5"
+
 
 ################################################
 # Get raw data step
 ################################################
 raw_training_data = OutputFileDatasetConfig(name="raw_data_training")
 raw_training_data = raw_training_data.register_on_complete(name="raw_data_training")
-
-raw_training_data = PipelineData('raw_training_data', datastore=datastore).as_dataset()
-raw_training_data = raw_training_data.register(name='prepared_weather_ds', create_new_version=True)
 
 
 get_raw_data_step = PythonScriptStep(
@@ -179,6 +176,7 @@ training_pipeline = Pipeline(
     workspace=workspace, 
     steps=test_and_promote_model_step,
 )
+
+# Submit training job pipeline run
 training_pipeline_run = Experiment(workspace, 'housing-model-training-pipeline').submit(training_pipeline)
 
-#training_pipeline_run.wait_for_completion()

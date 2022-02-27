@@ -14,14 +14,13 @@ dependencies:
   - pyarrow
   - seaborn
   - pip:
-    - click
     - python-dotenv
     - rich
     - pandera
     - evidently
     - mlflow
+    - hydra-core
     - azureml-core
     - azureml-mlflow
-    - hydra-core
     - azureml-dataset-runtime
     - azureml-pipeline-core
