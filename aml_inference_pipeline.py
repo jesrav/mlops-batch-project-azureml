@@ -27,8 +27,6 @@ workspace = Workspace.get(
     subscription_id=os.environ["SUBSCRIPTION_ID"],
 )
 
-experiment=Experiment(workspace=workspace, name="housing-model-training-pipeline")
-
 datastore = workspace.get_default_datastore()
 
 compute_target = workspace.compute_targets["cpu-cluster"]
@@ -39,11 +37,11 @@ aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-ex
 ################################################
 # Get and prepare data step
 ################################################
-model_input_data = OutputFileDatasetConfig(name='model_input_training')
-model_input_data = model_input_data.register_on_complete(name='model_input_training')
+model_input_data = OutputFileDatasetConfig(name='model_input_inference')
+model_input_data = model_input_data.register_on_complete(name='model_input_inference')
 
 get_and_prepare_data_step = CommandStep(
-    name="get_raw_data",  
+    name="get_and_prepare_data",  
     command=(
         "python -m src.data.prepare_data_pipeline "
         f"data.model_input.folder={model_input_data.arg_val}"
@@ -61,13 +59,13 @@ get_and_prepare_data_step = CommandStep(
 ################################################
 prediction_data = OutputFileDatasetConfig(name='prediction_data')
 prediction_data = prediction_data.register_on_complete(name='prediction_data')
-model_input_data_as_input = model_input_data.as_input(name="model_input")
+model_input_data_as_input = model_input_data.as_input(name="model_input_inference")
 
 batch_inference_step = CommandStep(
     name="batch_inference", 
     command=(
         "python -m src.models.inference "
-        f"data.model_input.folder={model_input_data_as_input.arg_val}"
+        f"data.model_input.folder={model_input_data_as_input.arg_val} "
         f"data.prediction_data.folder={prediction_data.arg_val}"
     ),
     source_directory=".",
@@ -90,4 +88,4 @@ batch_inference_pipeline = Pipeline(
     steps=batch_inference_pipeline_steps,
 )
 # Submit batch inference job pipeline run
-batch_inference_pipeline = Experiment(workspace, 'housing-model-inference-pipeline').submit(batch_inference_pipeline)
+batch_inference_pipeline_run = Experiment(workspace, 'housing-model-inference-pipeline').submit(batch_inference_pipeline)
