@@ -126,7 +126,7 @@ def get_latest_model_from_local_mlflow(
     successful_run_infos.sort(key=lambda x: x.end_time)
     latest_successful_run_info = successful_run_infos[-1]
     latest_successful_run = client.get_run(run_id=latest_successful_run_info.run_id)
-    model_uri = latest_successful_run.info.artifact_uri + "/model"
+    model_uri = f'{latest_successful_run.info.artifact_uri}/model'
     return LoadedMLFlowModel.from_local_path(model_uri)
 
 
