@@ -5,24 +5,19 @@ Module to split modelling data into
 """
 import logging
 from pathlib import Path
-import os
 
 import hydra
 import mlflow
 from sklearn.model_selection import train_test_split
 import pandas as pd
-from dotenv import load_dotenv, find_dotenv
 
-from ..utils import set_seed, set_mlflow_uri_cli_auth
-
-load_dotenv(find_dotenv())
+from ..utils import set_seed
 
 logger = logging.getLogger(__name__)
 
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-
     logger.info("Fix seed.")
     seed = set_seed()
     mlflow.log_params({"seed": seed})

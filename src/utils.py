@@ -127,14 +127,3 @@ def get_latest_model(
 def set_seed(seed=33):
     np.random.seed(seed)
     return seed
-
-
-def set_mlflow_uri_cli_auth(subscription_id, resource_group, name):
-    cli_auth = AzureCliAuthentication()
-    workspace = Workspace.get(
-        resource_group=resource_group,
-        name=name,
-        auth=cli_auth,
-        subscription_id=subscription_id,
-    )
-    mlflow.set_tracking_uri(workspace.get_mlflow_tracking_uri())
