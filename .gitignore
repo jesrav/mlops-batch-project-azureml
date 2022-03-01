@@ -140,8 +140,7 @@ cython_debug/
 
 
 /mlruns
-/artifacts
-/data/
+/data/**/*.parquet
 /logs/*.log
 /artifacts/*.json
 /artifacts/*.pickle
