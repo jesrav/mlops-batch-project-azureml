@@ -1,12 +1,11 @@
 import os
 
 from azureml.core import Workspace, Experiment
-from azureml.pipeline.steps import PythonScriptStep, CommandStep
+from azureml.pipeline.steps import CommandStep
 from azureml.core.authentication import ServicePrincipalAuthentication
-from azureml.data import OutputFileDatasetConfig
 from azureml.core.runconfig import RunConfiguration
 from azureml.core import Environment 
-from azureml.pipeline.core import Pipeline, StepSequence
+from azureml.pipeline.core import Pipeline
 
 from dotenv import load_dotenv, find_dotenv
 

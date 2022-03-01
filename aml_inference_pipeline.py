@@ -1,7 +1,7 @@
 import os
 
 from azureml.core import Workspace, Experiment
-from azureml.pipeline.steps import PythonScriptStep, CommandStep
+from azureml.pipeline.steps import CommandStep
 from azureml.core.authentication import ServicePrincipalAuthentication
 from azureml.data import OutputFileDatasetConfig
 from azureml.core.runconfig import RunConfiguration

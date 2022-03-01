@@ -11,7 +11,7 @@ from azureml.core import Run
 import pandas as pd
 
 from .evaluation import RegressionEvaluation
-from ..utils import get_latest_model
+from ..utils import get_latest_model_from_aml
 
 
 logger = logging.getLogger(__name__)
@@ -129,13 +129,13 @@ def main(config):
     )
 
     logger.info("Loading latest trained model.")
-    loaded_model_challenger = get_latest_model(workspace, config["main"]["registered_model_name"])
+    loaded_model_challenger = get_latest_model_from_aml(workspace, config["main"]["registered_model_name"])
 
     #TODO: raise error if tag is prod
 
     logger.info("Loading current prod model if it exists.")
     try:
-        loaded_model_current = get_latest_model(workspace, config["main"]["registered_model_name"], tag_names=["prod"])
+        loaded_model_current = get_latest_model_from_aml(workspace, config["main"]["registered_model_name"], tag_names=["prod"])
     except:
         loaded_model_current = None 
 

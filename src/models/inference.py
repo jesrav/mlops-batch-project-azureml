@@ -4,10 +4,11 @@ from pathlib import Path
 
 import pandas as pd
 import hydra
-import mlflow
 from azureml.core import Run
 
-from ..utils import get_latest_model, LoadedMLFlowModel
+from ..utils import (
+    get_latest_model_from_aml, get_latest_model_from_local_mlflow
+)
 logger = logging.getLogger(__name__)
 
 
@@ -22,11 +23,11 @@ def main(config):
     if config["main"]["run_locally"]:
         model_path = config["data"]["model"]["folder"]
         logger.info(f"Load model from local folder {model_path}.")
-        loaded_model = LoadedMLFlowModel.from_local_path(model_path=str(model_path))
+        loaded_model = get_latest_model_from_local_mlflow()
     else:
         logger.info("Load model from model registry.")
         workspace = Run.get_context().experiment.workspace  
-        loaded_model = get_latest_model(
+        loaded_model = get_latest_model_from_aml(
             workspace, 
             config["main"]["registered_model_name"], 
             tag_names=["prod"]

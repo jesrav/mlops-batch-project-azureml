@@ -1,9 +1,8 @@
-# MLOps batch example project, using Azure ML CLI V2
+# MLOps batch example project, using Azure ML
 
-Toy project, that implements passive retraining for a batch prediction regression use case.
+Toy project, that implements passive retraining and drift detection for a batch prediction regression use case.
 
-The project deploys pipelines for training, inference and drift detection as Azure ML pipeline jobs via the Azure ML cli v2.
-
+The project deploys pipelines for training, inference and drift detection as Azure ML pipeline jobs.
 
 ## Tools used
 - [Hydra](https://hydra.cc) for configuration 
@@ -11,12 +10,24 @@ The project deploys pipelines for training, inference and drift detection as Azu
 - [AzureMl](https://docs.microsoft.com/en-us/azure/machine-learning/overview-what-is-azure-machine-learn) for data versioning through AzureML Pipelines
 - [Evidently AI](https://evidentlyai.com) for drift detection
 
+## Running locally / on Azure
+Azure ml has some great functionality for tracking experiments and versioning data and models.
+Unfortunately you can not run Azure ml pipelines locally. To be able to iterate quickly, all the steps in the ml training and inference pipelines are python command line scripts that can be orchestrated locally using make. When running locally, we write the mlflow runs to the standard local folder mlruns.
+To run the pipelines in azure, we create and submit azureml pipelines, combining the script steps using the azureml SDK.
+
+### Azureml CLI v2
+
+AzureML has a new CLI in preview. It does not seem to implement all the functionality available using the python SDK, but is really interesting. The pipelines can be run using this cli using the yaml files in `azureml_cli_v2`.
+
+
 
 # Get started
 
 ## Requirements
 - Azure account
 - AzureML workspace
+
+
 - the Azure CLI. See [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for installation.
 - The Azure ML CLI version 2 extension. See [here](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-configure-cli) on how to install.
 

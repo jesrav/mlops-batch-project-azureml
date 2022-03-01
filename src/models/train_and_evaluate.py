@@ -64,24 +64,17 @@ def train_evaluate(
         pipeline_class.save_fitted_pipeline_plots(pipeline, out_dir=tmpdirname)
         mlflow.log_artifact(tmpdirname, artifact_path="evaluation")
 
-    if config["main"]["run_locally"]:
-        model_path = config["data"]["model"]["folder"]
-        logger.info(f"Saving model trained on all data to {model_path}.")
-        mlflow.pyfunc.save_model(
-            python_model=MLFlowModelWrapper(pipeline),
-            path=model_path,
-            conda_env=pipeline_class.get_conda_env(),
-            code_path=["src"],
-        )
-    else:
-        logger.info("Logging model trained on all data.")
-        mlflow.pyfunc.log_model(
-            python_model=MLFlowModelWrapper(pipeline),
-            artifact_path="model",
-            conda_env=pipeline_class.get_conda_env(),
-            code_path=["src"],
-            registered_model_name=config["main"]["registered_model_name"],
-        )
+    logger.info("Logging model trained on all data.")
+    mlflow.pyfunc.log_model(
+        python_model=MLFlowModelWrapper(pipeline),
+        artifact_path="model",
+        conda_env=pipeline_class.get_conda_env(),
+        code_path=["src"],
+        registered_model_name=(
+            None if config["main"]["run_locally"]
+            else config["main"]["registered_model_name"]
+        ),
+    )
 
 
 @hydra.main(config_path="../../conf", config_name="config")
