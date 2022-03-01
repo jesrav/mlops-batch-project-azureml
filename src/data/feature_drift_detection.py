@@ -46,22 +46,9 @@ def get_latest_inference_data(workspace, experiment_name) -> pd.DataFrame:
     inference_runs = experiment.get_runs()
     latest_inference_run = next(inference_runs)
  
-    steps = latest_inference_run.get_steps()
-    datasets = {}
-    for step in steps:
-        datasets = datasets | step.get_outputs()
-    try: 
-        inference_input_dataset = datasets["model_input_inference"]
-    except KeyError:
-        raise KeyError("Model input dataset is not output from any of the pipeline steps.")
-
-    dataset_reference = inference_input_dataset.get_port_data_reference()
-    with TemporaryDirectory() as tmpdirname:
-        dataset_reference.download(local_path=tmpdirname)
-        file_path = (
-            f"{tmpdirname}/{dataset_reference.path_on_datastore}/model_input.parquet"
-        )
-        return pd.read_parquet(file_path)
+    pipeline_runs = list(latest_inference_run.get_children())
+    batch_inference_run = [run for run in pipeline_runs if run.name == 'batch_inference'][0]
+    return get_dataset_from_run(batch_inference_run, "model_input_inference")
 
 
 @hydra.main(config_path="../../conf", config_name="config")
