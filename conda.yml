@@ -24,3 +24,4 @@ dependencies:
     - azureml-mlflow
     - azureml-dataset-runtime
     - azureml-pipeline-core
+    - azureml-pipeline
