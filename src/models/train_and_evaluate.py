@@ -13,7 +13,6 @@ import pandas as pd
 from sklearn.model_selection import cross_val_predict
 import hydra
 import mlflow
-from azureml.core import Run, Model
 
 from ..utils import MLFlowModelWrapper, set_seed
 from ..models.evaluation import RegressionEvaluation
@@ -81,7 +80,7 @@ def train_evaluate(
             artifact_path="model",
             conda_env=pipeline_class.get_conda_env(),
             code_path=["src"],
-            registered_model_name=config["main"]["registered_model_name"]
+            registered_model_name=config["main"]["registered_model_name"],
         )
 
 
