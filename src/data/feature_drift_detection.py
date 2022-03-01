@@ -1,7 +1,7 @@
 """
 Module for doing drift detection
 """
-from tempfile import TemporaryDirectory, tempdir
+from tempfile import TemporaryDirectory
 import logging
 
 import hydra
@@ -66,7 +66,7 @@ def main(config):
     # data from the last batch inference.
     logger.info("Load data used for latest inference.")
     latest_inference_data = get_latest_inference_data(
-        workspace=workspace, 
+        workspace=workspace,
         experiment_name=config["main"]["inference_experiment_name"]
     )
 
