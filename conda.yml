@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python==3.9
+  - python==3.8
   - make
   - pip
   - pandas
@@ -14,13 +14,14 @@ dependencies:
   - pyarrow
   - seaborn
   - pip:
-    - click
     - python-dotenv
     - rich
     - pandera
     - evidently
     - mlflow
-    - azureml-mlflow
     - hydra-core
+    - azureml-core
+    - azureml-mlflow
     - azureml-dataset-runtime
     - azureml-pipeline-core
+    - azureml-pipeline

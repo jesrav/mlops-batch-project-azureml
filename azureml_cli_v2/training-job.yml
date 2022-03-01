@@ -14,9 +14,9 @@ jobs:
       local_path: ../.
     outputs:
       raw_data:
-  preprocess_data:
+  clean_and_validate:
     command: >-
-      python -m src.data.process_data
+      python -m src.data.clean_and_validate
       data.raw_data=${{inputs.raw_data}}/raw_trainin_data.parquet
       data.clean_data=${{outputs.clean_data}}/clean_trainin_data.parquet
     code:
@@ -36,14 +36,6 @@ jobs:
       clean_data: ${{jobs.preprocess_data.outputs.clean_data}}
     outputs:
       model_input:
-  validate_model_input:
-    command: >-
-        python -m src.data.validate_data 
-        data.model_input=${{inputs.model_input}}/model_input.parquet
-    code:
-      local_path: ../.
-    inputs:
-      model_input: ${{jobs.add_features.outputs.model_input}}
   data_segregation:
     command: >-
         python -m src.data.data_segregation 

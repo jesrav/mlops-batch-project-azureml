@@ -32,7 +32,7 @@ def get_dataset_from_run(run: Run, dataset_name: str) -> pd.DataFrame:
     return df
 
 
-def get_prod_model_training(workspace, experiment_name, model_name) -> pd.DataFrame:
+def get_prod_model_training_data(workspace, experiment_name, model_name) -> pd.DataFrame:
     """Get training data used to train the current production model"""
     prod_aml_model = Model(workspace=workspace, name=model_name, tags=["prod"])
     experiment = Experiment(workspace, experiment_name)
@@ -41,34 +41,21 @@ def get_prod_model_training(workspace, experiment_name, model_name) -> pd.DataFr
     
 
 def get_latest_inference_data(workspace, experiment_name) -> pd.DataFrame:
-    """Get training data used to train the current production model"""
+    """Get latest data use for batch inference."""
     experiment = Experiment(workspace, experiment_name)
     inference_runs = experiment.get_runs()
     latest_inference_run = next(inference_runs)
  
-    steps = latest_inference_run.get_steps()
-    datasets = {}
-    for step in steps:
-        datasets = datasets | step.get_outputs()
-    try: 
-        inference_input_dataset = datasets["model_input"]
-    except KeyError:
-        raise KeyError("Model input dataset is not output from any of the pipeline steps.")
-
-    dataset_reference = inference_input_dataset.get_port_data_reference()
-    with TemporaryDirectory() as tmpdirname:
-        dataset_reference.download(local_path=tmpdirname)
-        file_path = (
-            f"{tmpdirname}/{dataset_reference.path_on_datastore}/model_input.parquet"
-        )
-        return pd.read_parquet(file_path)
+    pipeline_runs = list(latest_inference_run.get_children())
+    batch_inference_run = [run for run in pipeline_runs if run.name == 'batch_inference'][0]
+    return get_dataset_from_run(batch_inference_run, "model_input_inference")
 
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
     workspace = Run.get_context().experiment.workspace
 
-    training_data = get_prod_model_training(
+    training_data = get_prod_model_training_data(
         workspace=workspace,
         experiment_name=config["main"]["training_experiment_name"],
         model_name=config['main']['registered_model_name'],

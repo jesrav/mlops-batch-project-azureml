@@ -3,3 +3,4 @@ experiment_name: house-model-inference-pipeline
 registered_model_name: "housing_model"
 inference_sample_size: 1000
 med_inc_mean_drift_percentage: 0.15
+run_locally: false

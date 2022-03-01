@@ -4,13 +4,14 @@ Script for promoting latest trained model to production if the performance on a 
 - is better than the current production model.
 """
 import logging
+from pathlib import Path
 
 import hydra
 from azureml.core import Run
 import pandas as pd
 
 from .evaluation import RegressionEvaluation
-from ..utils import get_latest_model
+from ..utils import get_latest_model_from_aml
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ def log_promotion_status(model_id: str, additional_info: str, model_to_be_promot
 
 
 class SingleModelTest:
-
+    """Tests of a single model"""
     def __init__(self, model, test_data, target_col, max_mae):
         self.model = model
         self.test_data = test_data
@@ -78,6 +79,7 @@ class SingleModelTest:
 
 
 class ChallengerModelTest:
+    """Tests that compare a new challenger model to another model."""
     def __init__(self, model_challenger, model_current, test_data, target_col):
         self.model_challenger = model_challenger
         self.model_current = model_current
@@ -121,16 +123,19 @@ def main(config):
     workspace = Run.get_context().experiment.workspace
     
     logger.info("Load hold out test data.")
-    test_data = pd.read_parquet(config["data"]["test_data"])
+    test_data = pd.read_parquet(
+        Path(config["data"]["test_data"]["folder"]) 
+        / config["data"]["test_data"]["file_name"]  
+    )
 
     logger.info("Loading latest trained model.")
-    loaded_model_challenger = get_latest_model(workspace, config["main"]["registered_model_name"])
+    loaded_model_challenger = get_latest_model_from_aml(workspace, config["main"]["registered_model_name"])
 
     #TODO: raise error if tag is prod
 
     logger.info("Loading current prod model if it exists.")
     try:
-        loaded_model_current = get_latest_model(workspace, config["main"]["registered_model_name"], tag_names=["prod"])
+        loaded_model_current = get_latest_model_from_aml(workspace, config["main"]["registered_model_name"], tag_names=["prod"])
     except:
         loaded_model_current = None 
 

@@ -3,3 +3,4 @@ experiment_name: housing-model-drift-detection-pipeline
 training_experiment_name: housing-model-training-pipeline
 inference_experiment_name: housing-model-inference-pipeline
 registered_model_name: "housing_model"
+run_locally: False

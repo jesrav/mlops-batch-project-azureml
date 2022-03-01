@@ -1,6 +1,18 @@
-raw_data: "data/training_pipeline/raw/raw_data.parquet"
-clean_data: "data/training_pipeline/processed/clean_data.parquet"
-model_input: "data/training_pipeline/processed/modelling_data.parquet"
-train_validate_data: "data/training_pipeline/processed/train_validate_data.parquet"
-test_data: "data/training_pipeline/processed/test_data.parquet"
-predictions: "placeholder"
+raw_data: 
+  folder: "data/training_pipeline/raw"
+  file_name: "raw_data.parquet"
+clean_data: 
+  folder: "data/training_pipeline/processed"
+  file_name: "clean_data.parquet"
+model_input: 
+  folder: "data/training_pipeline/processed"
+  file_name: "modelling_data.parquet"
+train_validate_data: 
+  folder: "data/training_pipeline/processed" 
+  file_name: "train_validate_data.parquet"
+test_data: 
+  folder: "data/training_pipeline/processed"
+  file_name: "test_data.parquet"
+predictions:   
+  folder: "placeholder"
+  file_name: "placeholder"
