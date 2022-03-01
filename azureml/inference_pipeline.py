@@ -10,11 +10,11 @@ from azureml.pipeline.core import Pipeline, StepSequence
 
 from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
+
 ################################################
 # Setup
 ################################################
-load_dotenv(find_dotenv())
-
 sp_auth = ServicePrincipalAuthentication(
     tenant_id=os.environ["TENANT_ID"],
     service_principal_id=os.environ["SERVICE_PRINCIPAL_ID"],
@@ -32,7 +32,9 @@ datastore = workspace.get_default_datastore()
 compute_target = workspace.compute_targets["cpu-cluster"]
 
 aml_run_config = RunConfiguration()
-aml_run_config.environment = Environment.get(workspace=workspace, name="mlops-example-proj-env")
+aml_run_config.environment = Environment.get(
+    workspace=workspace, name="mlops-example-env"
+)
 
 ################################################
 # Get and prepare data step
