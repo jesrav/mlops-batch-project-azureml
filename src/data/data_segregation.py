@@ -22,13 +22,6 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="../../conf", config_name="config")
 def main(config):
-    
-    if config["main"]["run_locally"]:
-        set_mlflow_uri_cli_auth(
-            subscription_id=os.environ["SUBSCRIPTION_ID"],
-            resource_group=os.environ["RESOURCE_GROUP"],
-            name=os.environ["WORKSPACE_NAME"],
-        )
 
     logger.info("Fix seed.")
     seed = set_seed()
