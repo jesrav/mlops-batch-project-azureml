@@ -21,8 +21,7 @@ def main(config):
     )
 
     if config["main"]["run_locally"]:
-        model_path = config["data"]["model"]["folder"]
-        logger.info(f"Load model from local folder {model_path}.")
+        logger.info("Load model from latest local mlflow run.")
         loaded_model = get_latest_model_from_local_mlflow()
     else:
         logger.info("Load model from model registry.")
